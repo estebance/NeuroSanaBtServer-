@@ -10,33 +10,38 @@ import javax.microedition.io.StreamConnection;
 
 import com.bt.loadfile.ChargeFile;
 
+
+//hilo para el manejo de la conexion bluetooth 
+
 public class ManageConnectionThread implements Runnable 
 {
-
-	StreamConnection mConnection;	
-	
-    private  OutputStream mmOutStream;
-    private  InputStream mmInputStream;
+	StreamConnection My_Connection;		
+    private  OutputStream MyOutStream;
+    private  InputStream MyInputStream;
     private static final int COMANDO_SALIR = 1;
 	private static final int COMANDO_ENVIAR = 2;
+	private static final int COMANDO_CANCELAR=3;
+	private static final int COMANDO_INICIAR=4; ;
+	private static final int COMANDO_TERMINADO=5;
+	private static final int COMANDO_CANCELADO=5;
 	
 	
 	
 	
-	public ManageConnectionThread( StreamConnection connection )
+   public ManageConnectionThread( StreamConnection connection )
 	{
-	  mConnection = connection;	 
-      InputStream tmpIn = null;
-      OutputStream tmpOut = null;
+	  My_Connection = connection;	 
+      InputStream tmpInput = null;
+      OutputStream tmpOutput = null;
       try 
       {
-          tmpIn = mConnection.openInputStream();
-          tmpOut = mConnection.openOutputStream();
+          tmpInput = My_Connection.openInputStream();
+          tmpOutput = My_Connection.openOutputStream();
       } 
       catch (IOException e) {}
 
-      mmInputStream = tmpIn;
-      mmOutStream = tmpOut;
+      MyInputStream = tmpInput;
+      MyOutStream = tmpOutput;
   }
 	  
 	  
@@ -50,22 +55,18 @@ public class ManageConnectionThread implements Runnable
 	
 	try 
 	{
-		System.out.println("esperando una solicitud");
-		DataInputStream entrada = new DataInputStream(mConnection.openInputStream());		
-		
+		System.out.println("esperando una solicitud por parte del cliente");
+		DataInputStream entrada = new DataInputStream(My_Connection.openInputStream());			
 		while(true)
 		{			
 		System.out.println(entrada.readUTF());			
-	
 		int comando = Integer.parseInt(entrada.readUTF());
-
 	    if(comando == COMANDO_SALIR)
 		{
-		System.out.println("salimos");
+		System.out.println("salimos del servidor");
 		closeall();
 		break; 
 		}
-
 	    else
 	    {
 	    processCommand(comando);		
@@ -95,18 +96,53 @@ public class ManageConnectionThread implements Runnable
 	    sendata.SetRouteData("una ruta");
 	    byte[] informacion = sendata.DataFile();
 	    String nombrearchivo = sendata.GetNameFile();
-	       
         try 
         {	
-         DataOutputStream flujo= new DataOutputStream( mmOutStream );
+         DataOutputStream flujo= new DataOutputStream( MyOutStream );
          flujo.write(informacion);
          // cerramos para evitar problemas
          flujo.close();
         } 
         
-        catch (IOException e) { }
-				
+        catch (IOException e) { }			
 		}
+		
+		if(command == COMANDO_INICIAR)
+		{
+		
+		/* ordenes para iniciar la captura de archivos cuando finalmente termine 
+		   respondera con un comando terminado*/	
+	     try 
+		      {
+		      DataOutputStream flujo= new DataOutputStream(MyOutStream);
+		      flujo.writeUTF(Integer.toString(COMANDO_TERMINADO));
+		      flujo.close();
+		      } 
+		      catch (IOException e) 
+		      {
+		 	  System.out.println("error al responder la solicitud:"+e);    
+		      }	
+		}
+		
+		if(command == COMANDO_CANCELAR)
+		{
+			/* ordenes para cancelar la toma de archivos se supone  este deberia buscar 
+			 * el archivo hasta el momento generado y borrarlo	
+			 */
+		 try 
+	     {
+			      DataOutputStream flujo= new DataOutputStream(MyOutStream);
+			      flujo.writeUTF(Integer.toString(COMANDO_CANCELADO));
+			      flujo.close();
+	     } 
+	     catch (IOException e) 
+	     {
+		  System.out.println("error al responder la solicitud:"+e);    
+	     }			
+			
+		}
+		
+		
 	}
 	
 	
@@ -115,10 +151,10 @@ public class ManageConnectionThread implements Runnable
 		
 	try
 	{
-		mmOutStream.close();
-		mmInputStream.close();
+		MyOutStream.close();
+		MyInputStream.close();
 		// puede que este no funcione 
-		mConnection.close();
+		My_Connection.close();
 	} 
 	
 	catch (IOException e) 
