@@ -33,7 +33,7 @@ public class ManageConnectionThread implements Runnable
 	  My_Connection = connection;	 
       InputStream tmpInput = null;
       OutputStream tmpOutput = null;
-      try 
+     try 
       {
           tmpInput = My_Connection.openInputStream();
           tmpOutput = My_Connection.openOutputStream();
@@ -42,6 +42,7 @@ public class ManageConnectionThread implements Runnable
 
       MyInputStream = tmpInput;
       MyOutStream = tmpOutput;
+  
   }
 	  
 	  
@@ -56,7 +57,7 @@ public class ManageConnectionThread implements Runnable
 	try 
 	{
 		System.out.println("esperando una solicitud por parte del cliente");
-		DataInputStream entrada = new DataInputStream(My_Connection.openInputStream());			
+		DataInputStream entrada = new DataInputStream(MyInputStream);			
 		while(true)
 		{			
 		System.out.println(entrada.readUTF());			
@@ -81,7 +82,7 @@ public class ManageConnectionThread implements Runnable
 	e.printStackTrace();	
 	}
 		
-		
+	closeall();	
 		
 	}
 
@@ -89,6 +90,7 @@ public class ManageConnectionThread implements Runnable
 		// TODO Auto-generated method stub
 		System.out.println("el proceso es " + command);
 		
+		/*
 		if(command == COMANDO_ENVIAR)
 		{	
 	    ChargeFile sendata = new ChargeFile();
@@ -106,7 +108,7 @@ public class ManageConnectionThread implements Runnable
         
         catch (IOException e) { }			
 		}
-		
+		*/
 		if(command == COMANDO_INICIAR)
 		{
 		
