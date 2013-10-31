@@ -9,21 +9,25 @@ import java.io.OutputStream;
 import javax.microedition.io.StreamConnection;
 
 import com.bt.loadfile.ChargeFile;
+import com.bt.server.ServerBt;
 
 
 //hilo para el manejo de la conexion bluetooth 
 
-public class ManageConnectionThread implements Runnable 
+public class ManageConnectionThread extends Thread 
 {
-	StreamConnection My_Connection;		
+	private StreamConnection My_Connection;		
    // private  OutputStream MyOutStream;
-   // private  InputStream MyInputStream;
+    private InputStream MyInputStream;
+    private OutputStream MyOutputStream;
     private static final int COMANDO_SALIR = 1;
 	private static final int COMANDO_ENVIAR = 2;
 	private static final int COMANDO_CANCELAR=3;
 	private static final int COMANDO_INICIAR=4; ;
 	private static final int COMANDO_TERMINADO=5;
-	private static final int COMANDO_CANCELADO=5;
+	private static final int COMANDO_CANCELADO=6;
+	private static final int COMANDO_ERROR = -1; 
+	
 	
 	
 	
@@ -31,46 +35,40 @@ public class ManageConnectionThread implements Runnable
    public ManageConnectionThread( StreamConnection connection )
 	{
 	  My_Connection = connection;	 
-    //  InputStream tmpInput = null;
-    //  OutputStream tmpOutput = null;
-    // try 
-    //  {
-    //      tmpInput = My_Connection.openInputStream();
-    //      tmpOutput = My_Connection.openOutputStream();
-    //  } 
-    //  catch (IOException e) {}
-
-     // MyInputStream = tmpInput;
-     // MyOutStream = tmpOutput;
-  
-  }
+    }
 	  
-	  
-	  
-	
-	
-	
 	@Override
 	public void run() 
 	{
 	
 	try 
 	{
-		System.out.println("esperando una solicitud por parte del cliente");
-		//DataInputStream entrada = new DataInputStre,am(MyInputStream);	
-		InputStream MyInputStream = My_Connection.openInputStream();
+		System.out.println("esperando una solicitud por parte del cliente");	
+	    MyInputStream = My_Connection.openInputStream();
+		MyOutputStream = My_Connection.openOutputStream();	
+		
+		int comando = 0;
+		
 		while(true)
 		{			
-		System.out.println(MyInputStream.read());			
-		//int comando = Integer.parseInt(MyInputStream.read());
-		int comando = MyInputStream.read();
-	    
+		comando = MyInputStream.read();
+		System.out.println("comando que llega" + comando);
+		
 		if(comando == COMANDO_SALIR)
 		{
 		System.out.println("salimos del servidor");
 		closeall();
 		break; 
 		}
+		
+		if(comando == -1)
+		{
+	
+		closeall();
+		resume_connection();	
+		break;	
+		}
+		
 	    else
 	    {
 	    processCommand(comando);		
@@ -78,7 +76,7 @@ public class ManageConnectionThread implements Runnable
 	    
 		}
 		
-		MyInputStream.close();
+		
 		
 	}
 	catch(Exception e)
@@ -97,46 +95,44 @@ public class ManageConnectionThread implements Runnable
 		
 		try
 		{
-		OutputStream MyOutputStream = My_Connection.openOutputStream();	
 		
 		if(command == COMANDO_ENVIAR)
 		{	
 	    ChargeFile sendata = new ChargeFile();
 	    /////// como capturar la ruta del archivo generado por insuasty; 
-	    sendata.SetRouteData("una ruta");
+	    sendata.SetRouteData("C:/Users/sarita/Desktop/hola.txt");
 	    byte[] informacion = sendata.DataFile();
 	    String nombrearchivo = sendata.GetNameFile();
-
-        MyOutputStream.write(informacion);
-        MyOutputStream.close();
+        System.out.println("el nombre del archivo es" +nombrearchivo);
+        MyOutputStream.write(2);
+        MyOutputStream.write(nombrearchivo.getBytes("UTF-8"));
+       // MyOutputStream.close();
 	
 		}
 
 		if(command == COMANDO_INICIAR)
 		{		
 		/* ordenes para iniciar la captura de archivos cuando finalmente termine 
-		   respondera con un comando terminado*/		      
-		      MyOutputStream.write(COMANDO_TERMINADO);
-		      MyOutputStream.close(); 
-		}
+		   respondera con un comando terminado*/		   	
+		MyOutputStream.write(COMANDO_TERMINADO);
+	    }
 		
 		if(command == COMANDO_CANCELAR)
 		{
-			/* ordenes para cancelar la toma de archivos se supone  este deberia buscar 
-			 * el archivo hasta el momento generado y borrarlo	
-			 */
-		      MyOutputStream.write(COMANDO_CANCELADO);
-		      MyOutputStream.close(); 
-			
-	     }
+		/* ordenes para cancelar la toma de archivos se supone  este deberia buscar 
+		* el archivo hasta el momento generado y borrarlo	
+		*/
+		MyOutputStream.write(COMANDO_CANCELADO);
+	    }
 		
-		 MyOutputStream.close(); 
+	   }
 		
-		 }
-		 catch(Exception e)
-		 {
-		 System.out.println("error en process command" +e); 	
-		 }
+	   catch(Exception e)
+	   {
+		
+	    System.out.println("error en process command" +e);
+	    e.printStackTrace();
+	   }
 		
 
 		
@@ -148,17 +144,26 @@ public class ManageConnectionThread implements Runnable
 		
 	try
 	{
+		MyOutputStream.close();
+		MyInputStream.close();
 		My_Connection.close();
+		
 	} 
 	
 	catch (IOException e) 
 	
 	{
-		// TODO Auto-generated catch block
+		System.out.println("error al momento de intentar cerrar conexion");
 		e.printStackTrace();
 	}
 	
 		
+	}
+	
+	
+	private void resume_connection()
+	{
+    ServerBt service = new ServerBt();
 	}
 
 

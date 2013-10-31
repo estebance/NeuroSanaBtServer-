@@ -7,7 +7,7 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
-public class Servicebt implements Runnable    
+public class Servicebt extends Thread    
 {
 	
 	public Servicebt()
@@ -54,14 +54,14 @@ public class Servicebt implements Runnable
 	{
 	System.out.println("esperando por una conexion...");
 	connection = notifier_connection.acceptAndOpen();	
-	Thread processThread = new Thread(new ManageConnectionThread(connection));
+	ManageConnectionThread processThread = new ManageConnectionThread(connection);
 	processThread.start();
 	}
 	catch(Exception e)
 	{
 	System.out.println("error"+e);
 	}
-   }
+  }
 	
   }
 

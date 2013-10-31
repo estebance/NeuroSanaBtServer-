@@ -8,9 +8,7 @@ public class ServerBt {
 	 * @param args
 	 */
 	public static void main(String[] args) 
-	{
-	
-		
+	{	
 	Thread service = new Thread(new Servicebt());
 	service.start();
 	}
