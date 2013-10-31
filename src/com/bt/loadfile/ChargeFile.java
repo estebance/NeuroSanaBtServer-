@@ -40,6 +40,25 @@ public byte[] DataFile()
 }
 
 
+
+public File DataFile_f()
+{ 
+	
+	    try
+	    {
+	    // obtener file como bytes
+	    FileInputStream stream = new FileInputStream(routedata);
+	    File f = new File(routedata);
+	    return f;
+	    }
+	    catch(Exception e)
+	    {
+	    e.printStackTrace();	
+	    return null;
+	    }
+}
+
+
 public void SetRouteData( String routedata)
 {
 this.routedata = routedata;	
