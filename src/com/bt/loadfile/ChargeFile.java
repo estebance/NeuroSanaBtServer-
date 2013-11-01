@@ -41,21 +41,21 @@ public byte[] DataFile()
 
 
 
-public File DataFile_f()
+public FileInputStream DataFile_f()
 { 
+	FileInputStream stream_f  = null;
 	
-	    try
-	    {
-	    // obtener file como bytes
-	    FileInputStream stream = new FileInputStream(routedata);
-	    File f = new File(routedata);
-	    return f;
-	    }
-	    catch(Exception e)
-	    {
-	    e.printStackTrace();	
-	    return null;
-	    }
+    File f = new File(routedata);
+    try
+    {
+    stream_f = new FileInputStream(f);	
+    }
+    catch(Exception e)
+    {
+    e.printStackTrace();	
+    }
+    
+   return stream_f; 
 }
 
 

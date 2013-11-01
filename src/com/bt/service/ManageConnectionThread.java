@@ -1,6 +1,7 @@
 package com.bt.service;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -106,29 +107,38 @@ public class ManageConnectionThread extends Thread
 	    sendata.SetRouteData("C:/Users/sarita/Desktop/hola.txt");
 	    byte[] informacion = sendata.DataFile();
 	    String nombrearchivo = sendata.GetNameFile();
-	    File f = sendata.DataFile_f();
-        System.out.println("el nombre del archivo es" +nombrearchivo);
-        MyOutputStream.write(2);
+	    
+	    
+	    MyOutputStream.write(2);
         MyOutputStream.write(nombrearchivo.getBytes("UTF-8")); 
-        
-        FileInputStream stream = new FileInputStream(f);
-        BufferedInputStream bis = new BufferedInputStream(stream, 8 * 1024);
-       
-        int data_len = (int)f.length();
-        MyOutputStream.write(data_len);
+        MyOutputStream.write(200);
+        MyOutputStream.write(informacion);
         
         
+        /*other*/
+
+        /*
+        
+        BufferedOutputStream bos= new BufferedOutputStream(MyOutputStream);
+        FileInputStream  a = sendata.DataFile_f();
+        BufferedInputStream bis = new BufferedInputStream(a);
+        int n=-1;
         byte[] buffer = new byte[8192];
-        int len;
-        while ((len = bis.read(buffer)) != -1) 
-        {
-        	MyOutputStream.write(buffer, 0, len);
+        while((n = bis.read(buffer))>-1)
+        { 
+        bos.write(buffer,0,n);
+        }
+        
+        a.close();
+        bis.close();
+        bos.flush();
+        bos.close();
+       */ 
+        
         }
         
         
-        //MyOutputStream.write(informacion);
-	
-		}
+
 
 		if(command == COMANDO_INICIAR)
 		{		
