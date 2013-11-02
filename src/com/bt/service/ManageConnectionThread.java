@@ -104,20 +104,16 @@ public class ManageConnectionThread extends Thread
 		{	
 	    ChargeFile sendata = new ChargeFile();
 	    /////// como capturar la ruta del archivo generado por insuasty; 
-	    sendata.SetRouteData("C:/Users/sarita/Desktop/hola.txt");
+	    sendata.SetRouteData("C:/neurosanafiles/eegpesado.edf");
 	    byte[] informacion = sendata.DataFile();
 	    String nombrearchivo = sendata.GetNameFile();
-	    
-	    
 	    MyOutputStream.write(2);
-        MyOutputStream.write(nombrearchivo.getBytes("UTF-8")); 
-        MyOutputStream.write(200);
-        MyOutputStream.write(informacion);
-        
-        
+	    MyOutputStream.flush();
+        MyOutputStream.write((nombrearchivo+"").getBytes()); 
+	    MyOutputStream.flush();
         /*other*/
 
-        /*
+        
         
         BufferedOutputStream bos= new BufferedOutputStream(MyOutputStream);
         FileInputStream  a = sendata.DataFile_f();
@@ -132,8 +128,9 @@ public class ManageConnectionThread extends Thread
         a.close();
         bis.close();
         bos.flush();
-        bos.close();
-       */ 
+        //bos.close();
+        MyOutputStream.flush();
+        
         
         }
         
@@ -145,6 +142,7 @@ public class ManageConnectionThread extends Thread
 		/* ordenes para iniciar la captura de archivos cuando finalmente termine 
 		   respondera con un comando terminado*/		   	
 		MyOutputStream.write(COMANDO_TERMINADO);
+	    MyOutputStream.flush();
 	    }
 		
 		if(command == COMANDO_CANCELAR)
@@ -153,6 +151,7 @@ public class ManageConnectionThread extends Thread
 		* el archivo hasta el momento generado y borrarlo	
 		*/
 		MyOutputStream.write(COMANDO_CANCELADO);
+	    MyOutputStream.flush();
 	    }
 		
 	   }

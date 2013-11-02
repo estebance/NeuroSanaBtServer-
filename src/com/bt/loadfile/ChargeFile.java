@@ -23,7 +23,7 @@ public byte[] DataFile()
 	    // obtener file como bytes
 	    FileInputStream stream = new FileInputStream(routedata);
 	    File f = new File(routedata);
-	    int size = (int) f.length();
+	    int size = 1024;
 	    byte[] file = new byte[size];
 	    stream.read(file);
 	    // algo se podra hacer con esto ? podria ser un get
