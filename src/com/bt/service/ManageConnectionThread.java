@@ -123,8 +123,7 @@ public class ManageConnectionThread extends Thread
         while((n = bis.read(buffer))>-1)
         { 
         bos.write(buffer,0,n);
-        }
-        
+        }        
         a.close();
         bis.close();
         bos.flush();
