@@ -119,15 +119,28 @@ public class ManageConnectionThread extends Thread
         FileInputStream  a = sendata.DataFile_f();
         BufferedInputStream bis = new BufferedInputStream(a);
         int n=-1;
-        byte[] buffer = new byte[8192];
-        while((n = bis.read(buffer))>-1)
+        byte[] buffer = new byte[64];
+        while((n = bis.read(buffer)) !=-1)
         { 
         bos.write(buffer,0,n);
-        }        
+        bos.flush();
+        }
+        System.out.println("salimos");
+        bos.write(1);
+        bos.flush();
         a.close();
         bis.close();
-        bos.flush();
         //bos.close();
+        try
+        {
+        Thread.sleep(1000);	
+        }
+        catch(Exception e)
+        {
+        e.printStackTrace();	
+        }        
+        
+        MyOutputStream.write(COMANDO_TERMINADO);
         MyOutputStream.flush();
         
         
