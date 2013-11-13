@@ -56,6 +56,7 @@ public class ManageConnectionThread extends Thread
 		while(true)
 		{			
 		comando = MyInputStream.read();
+		
 		System.out.println("comando que llega" + comando);
 		
 		if(comando == COMANDO_SALIR)
@@ -102,7 +103,9 @@ public class ManageConnectionThread extends Thread
 		
 		if(command == COMANDO_ENVIAR)
 		{	
-	    ChargeFile sendata = new ChargeFile();
+		/*aqui llamo a la ruta del archivo evaluo la funcion en python getroutedata() y esta me devuelve un string con la ruta del archivo*/	
+	    
+		ChargeFile sendata = new ChargeFile();
 	    /////// como capturar la ruta del archivo generado por insuasty; 
 	    sendata.SetRouteData("C:/neurosanafiles/eegpesado.edf");
 	    byte[] informacion = sendata.DataFile();
