@@ -30,7 +30,8 @@ public class ManageConnectionThread extends Thread
 	private static final int COMANDO_INICIAR=4; ;
 	private static final int COMANDO_TERMINADO=5;
 	private static final int COMANDO_CANCELADO=6;
-	private static final int COMANDO_INICIADO=7;
+	private static final int COMANDO_INICIADO=7;		
+	private static final int COMANDO_FINALIZADO=8;	
 	private static final int COMANDO_ERROR = -1; 
 	
 	
@@ -50,11 +51,14 @@ public class ManageConnectionThread extends Thread
 	{
 		System.out.println("esperando una solicitud por parte del cliente");	
 	    MyInputStream = My_Connection.openInputStream();
-		MyOutputStream = My_Connection.openOutputStream();		
-		int comando = 0;	
+		MyOutputStream = My_Connection.openOutputStream();	
+		
+		int comando = 0;
+		
 		while(true)
 		{			
 		comando = MyInputStream.read();
+		
 		System.out.println("comando que llega" + comando);
 		
 		if(comando == COMANDO_SALIR)
@@ -65,7 +69,8 @@ public class ManageConnectionThread extends Thread
 		}
 		
 		if(comando == -1)
-		{	
+		{
+	
 		closeall();
 		resume_connection();	
 		break;	
@@ -77,7 +82,9 @@ public class ManageConnectionThread extends Thread
 	    }
 	    
 		}
-				
+		
+		
+		
 	}
 	catch(Exception e)
 	{
@@ -89,8 +96,8 @@ public class ManageConnectionThread extends Thread
 		
 	}
 
-	private void processCommand(int command) 
-	{
+	private void processCommand(int command) {
+		// TODO Auto-generated method stub
 		System.out.println("el proceso es " + command);
 		
 		try
@@ -102,7 +109,8 @@ public class ManageConnectionThread extends Thread
 	    
 		ChargeFile sendata = new ChargeFile();
 	    /////// como capturar la ruta del archivo generado por insuasty; 
-	    sendata.SetRouteData("C:/neurosanafiles/eegpesado.edf");
+	    sendata.SetRouteData("C:/eegabc.docx");
+	    byte[] informacion = sendata.DataFile();
 	    String nombrearchivo = sendata.GetNameFile();
 	    MyOutputStream.write(COMANDO_ENVIAR);
 	    MyOutputStream.flush();
@@ -138,7 +146,9 @@ public class ManageConnectionThread extends Thread
         }        
         
         MyOutputStream.write(COMANDO_TERMINADO);
-        MyOutputStream.flush();        
+        MyOutputStream.flush();
+        
+        
         }
         
         
@@ -148,21 +158,18 @@ public class ManageConnectionThread extends Thread
 		{		
 		/* ordenes para iniciar la captura de archivos cuando finalmente termine 
 		   respondera con un comando terminado*/		   	
-		MyOutputStream.write(COMANDO_INICIADO);
+		MyOutputStream.write(COMANDO_INICIADO);		
 	    MyOutputStream.flush();
-	    
-        try
-        {
+        /*try
+	    {
         Thread.sleep(10000);	
         }
         catch(Exception e)
         {
         e.printStackTrace();	
-        }  
-        
-		MyOutputStream.write(COMANDO_TERMINADO);
-	    MyOutputStream.flush();  
-	    
+        }*/
+        MyOutputStream.write(COMANDO_FINALIZADO);		
+	    MyOutputStream.flush(); 
 	    }
 		
 		if(command == COMANDO_CANCELAR)
@@ -173,7 +180,7 @@ public class ManageConnectionThread extends Thread
 		MyOutputStream.write(COMANDO_CANCELADO);
 	    MyOutputStream.flush();
 	    }
-				
+		
 	   }
 		
 	   catch(Exception e)
