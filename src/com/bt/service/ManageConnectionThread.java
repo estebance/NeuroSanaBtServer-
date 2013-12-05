@@ -34,13 +34,21 @@ public class ManageConnectionThread extends Thread
 	private static final int COMANDO_FINALIZADO=8;	
 	private static final int COMANDO_ERROR = -1; 
 	
+    private static final int  ACK_EDF           = 9;
+    private static final int  ACK_RUTA          = 8;
+    private static final int COMANDO_GETRUTA   = 7;
 	
+	// socket python 
+	private SocketThread socket_python;
+	
+
 	
 	
 	
    public ManageConnectionThread( StreamConnection connection )
 	{
-	  My_Connection = connection;	 
+	  My_Connection = connection;	
+	  socket_python = new SocketThread();
     }
 	  
 	@Override
@@ -69,8 +77,7 @@ public class ManageConnectionThread extends Thread
 		}
 		
 		if(comando == -1)
-		{
-	
+		{	
 		closeall();
 		resume_connection();	
 		break;	
@@ -107,10 +114,13 @@ public class ManageConnectionThread extends Thread
 		{	
 		/*aqui llamo a la ruta del archivo evaluo la funcion en python getroutedata() y esta me devuelve un string con la ruta del archivo*/	
 	    
+		socket_python.setinfo(Integer.toString(COMANDO_ENVIAR));
+		if(socket_python.getstate() == Integer.toString(ACK_RUTA))
+		{
+		String file_path = socket_python.get_file_path();						
 		ChargeFile sendata = new ChargeFile();
 	    /////// como capturar la ruta del archivo generado por insuasty; 
-	    sendata.SetRouteData("C:/eegabc.docx");
-	    byte[] informacion = sendata.DataFile();
+	    sendata.SetRouteData(file_path);
 	    String nombrearchivo = sendata.GetNameFile();
 	    MyOutputStream.write(COMANDO_ENVIAR);
 	    MyOutputStream.flush();
@@ -144,7 +154,9 @@ public class ManageConnectionThread extends Thread
         {
         e.printStackTrace();	
         }        
-        
+		 
+		} // fin del if 
+		
         MyOutputStream.write(COMANDO_TERMINADO);
         MyOutputStream.flush();
         
@@ -153,32 +165,57 @@ public class ManageConnectionThread extends Thread
         
         
 
-
 		if(command == COMANDO_INICIAR)
 		{		
 		/* ordenes para iniciar la captura de archivos cuando finalmente termine 
 		   respondera con un comando terminado*/		   	
 		MyOutputStream.write(COMANDO_INICIADO);		
 	    MyOutputStream.flush();
-        /*try
+        
+	    socket_python.setinfo(Integer.toString(COMANDO_INICIAR));
+	    sleep();
+	    while(true)
 	    {
-        Thread.sleep(10000);	
-        }
-        catch(Exception e)
-        {
-        e.printStackTrace();	
-        }*/
-        MyOutputStream.write(COMANDO_FINALIZADO);		
-	    MyOutputStream.flush(); 
+	    if(socket_python.getstate() == Integer.toString(COMANDO_ERROR))	
+	    {
+	        MyOutputStream.write(COMANDO_ERROR);		
+		    MyOutputStream.flush(); 
+		    break;
+	    	
+	    }	
+	    if(socket_python.getstate() == Integer.toString(COMANDO_TERMINADO))
+	    {
+	        MyOutputStream.write(COMANDO_FINALIZADO);		
+		    MyOutputStream.flush(); 
+		    break;
+	    }
+	    
+	    }
+	    
+	    
+
 	    }
 		
 		if(command == COMANDO_CANCELAR)
 		{
+			
+		socket_python.setinfo(Integer.toString(COMANDO_CANCELAR));
+		sleep();
+		if(socket_python.getstate() == Integer.toString(COMANDO_CANCELADO))
+		{
+			MyOutputStream.write(COMANDO_CANCELADO);
+		    MyOutputStream.flush();	
+		}
+		else
+		{
+			MyOutputStream.write(COMANDO_ERROR);
+		    MyOutputStream.flush();	
+			
+		}	
 		/* ordenes para cancelar la toma de archivos se supone  este deberia buscar 
 		* el archivo hasta el momento generado y borrarlo	
 		*/
-		MyOutputStream.write(COMANDO_CANCELADO);
-	    MyOutputStream.flush();
+
 	    }
 		
 	   }
@@ -222,7 +259,17 @@ public class ManageConnectionThread extends Thread
     ServerBt service = new ServerBt();
 	}
 
-
+    public void sleep()
+    {
+    try
+    {	
+    Thread.sleep(500);
+    }
+    catch(Exception e)
+    {
+    e.printStackTrace();	
+    }
+    }
    
 
 }

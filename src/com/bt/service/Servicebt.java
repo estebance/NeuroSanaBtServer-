@@ -55,7 +55,7 @@ public class Servicebt extends Thread
 	System.out.println("esperando por una conexion...");
 	connection = notifier_connection.acceptAndOpen();	
 	ManageConnectionThread processThread = new ManageConnectionThread(connection);
-	processThread.start();
+	processThread.start();	
 	}
 	catch(Exception e)
 	{
