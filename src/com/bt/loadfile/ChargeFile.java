@@ -9,11 +9,12 @@ public class ChargeFile
 String routedata; 
 // inicializamos por si se presentan problemas
 String filename = "nada";	
+File f; 
 	
 public ChargeFile(String routedata)
 {
 
-File f = new File(routedata);
+f = new File(routedata);
 filename = f.getName();	
 
 }	
@@ -22,7 +23,7 @@ public FileInputStream DataFile_f()
 { 
 
     FileInputStream stream_f  = null;	
-    File f = new File(routedata);
+    f = new File(routedata);
     try
     {
     stream_f = new FileInputStream(f);	
