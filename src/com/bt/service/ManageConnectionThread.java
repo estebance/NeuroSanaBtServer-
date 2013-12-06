@@ -37,6 +37,7 @@ public class ManageConnectionThread extends Thread
     private static final int  ACK_EDF           = 9;
     private static final int  ACK_RUTA          = 8;
     private static final int COMANDO_GETRUTA   = 7;
+    private static final int COMANDO_FALLA = 10;
 	
 	// socket python 
 	private SocketThread socket_python;
@@ -88,19 +89,14 @@ public class ManageConnectionThread extends Thread
 	    processCommand(comando);		
 	    }
 	    
-		}
-		
-		
-		
+		}	
 	}
 	catch(Exception e)
 	{
     System.out.println("se esta presentando un error al momento de ejecutar ordenes");
 	e.printStackTrace();	
-	}
-		
-	closeall();	
-		
+	}		
+	closeall();			
 	}
 
 	private void processCommand(int command) {
@@ -113,23 +109,33 @@ public class ManageConnectionThread extends Thread
 		if(command == COMANDO_ENVIAR)
 		{	
 		/*aqui llamo a la ruta del archivo evaluo la funcion en python getroutedata() y esta me devuelve un string con la ruta del archivo*/	
-	    
+	    int command_python = 0;
+	    String file_path = null;
 		socket_python.setinfo(Integer.toString(COMANDO_ENVIAR));
-		if(socket_python.getstate() == Integer.toString(ACK_RUTA))
+		sleep();
+		if(socket_python.getstate() != null)
 		{
-		String file_path = socket_python.get_file_path();						
-		ChargeFile sendata = new ChargeFile();
+		command_python = Integer.parseInt(socket_python.getstate());	
+		}	
+		if(command_python == ACK_RUTA)
+		{
+		sleep();		
+		file_path = socket_python.get_file_path();	
+		if(file_path != null)
+		{
+		
+		ChargeFile sendata = new ChargeFile(file_path);
 	    /////// como capturar la ruta del archivo generado por insuasty; 
-	    sendata.SetRouteData(file_path);
 	    String nombrearchivo = sendata.GetNameFile();
+	    System.out.println("El nombre del archivo es" + nombrearchivo);
+	    sleep();  // borrar 
+	    sleep();
 	    MyOutputStream.write(COMANDO_ENVIAR);
 	    MyOutputStream.flush();
         MyOutputStream.write((nombrearchivo+"").getBytes()); 
 	    MyOutputStream.flush();
         /*other*/
-
-        
-        
+     
         BufferedOutputStream bos= new BufferedOutputStream(MyOutputStream);
         FileInputStream  a = sendata.DataFile_f();
         BufferedInputStream bis = new BufferedInputStream(a);
@@ -154,7 +160,8 @@ public class ManageConnectionThread extends Thread
         {
         e.printStackTrace();	
         }        
-		 
+		
+		}// fin del if file_path
 		} // fin del if 
 		
         MyOutputStream.write(COMANDO_TERMINADO);
@@ -169,21 +176,25 @@ public class ManageConnectionThread extends Thread
 		{		
 		/* ordenes para iniciar la captura de archivos cuando finalmente termine 
 		   respondera con un comando terminado*/		   	
+		int command_python = 0;
 		MyOutputStream.write(COMANDO_INICIADO);		
 	    MyOutputStream.flush();
-        
 	    socket_python.setinfo(Integer.toString(COMANDO_INICIAR));
-	    sleep();
 	    while(true)
 	    {
-	    if(socket_python.getstate() == Integer.toString(COMANDO_ERROR))	
+	    if(socket_python.getstate() != null)
 	    {
-	        MyOutputStream.write(COMANDO_ERROR);		
+	    command_python = Integer.parseInt(socket_python.getstate());	
+	    }	
+	    		    	
+	    if(command_python == COMANDO_ERROR)	
+	    {
+	        MyOutputStream.write(COMANDO_FALLA);		
 		    MyOutputStream.flush(); 
 		    break;
 	    	
 	    }	
-	    if(socket_python.getstate() == Integer.toString(COMANDO_TERMINADO))
+	    if(command_python == COMANDO_TERMINADO)
 	    {
 	        MyOutputStream.write(COMANDO_FINALIZADO);		
 		    MyOutputStream.flush(); 
@@ -198,15 +209,20 @@ public class ManageConnectionThread extends Thread
 		
 		if(command == COMANDO_CANCELAR)
 		{
-			
+		int command_python = 0;	
 		socket_python.setinfo(Integer.toString(COMANDO_CANCELAR));
-		sleep();
-		if(socket_python.getstate() == Integer.toString(COMANDO_CANCELADO))
+		sleep();	
+		if(socket_python.getstate() != null)
+		{
+		 command_python = Integer.parseInt(socket_python.getstate());	
+		}	
+		
+		if(command_python == COMANDO_CANCELADO)
 		{
 			MyOutputStream.write(COMANDO_CANCELADO);
 		    MyOutputStream.flush();	
 		}
-		else
+		if(command_python == COMANDO_ERROR)
 		{
 			MyOutputStream.write(COMANDO_ERROR);
 		    MyOutputStream.flush();	
