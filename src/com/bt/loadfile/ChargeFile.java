@@ -23,7 +23,6 @@ public FileInputStream DataFile_f()
 { 
 
     FileInputStream stream_f  = null;	
-    f = new File(routedata);
     try
     {
     stream_f = new FileInputStream(f);	

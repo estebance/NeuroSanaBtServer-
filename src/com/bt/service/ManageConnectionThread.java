@@ -60,14 +60,12 @@ public class ManageConnectionThread extends Thread
 	{
 		System.out.println("esperando una solicitud por parte del cliente");	
 	    MyInputStream = My_Connection.openInputStream();
-		MyOutputStream = My_Connection.openOutputStream();	
-		
+		MyOutputStream = My_Connection.openOutputStream();			
 		int comando = 0;
 		
 		while(true)
 		{			
-		comando = MyInputStream.read();
-		
+		comando = MyInputStream.read();		
 		System.out.println("comando que llega" + comando);
 		
 		if(comando == COMANDO_SALIR)
@@ -128,8 +126,6 @@ public class ManageConnectionThread extends Thread
 	    /////// como capturar la ruta del archivo generado por insuasty; 
 	    String nombrearchivo = sendata.GetNameFile();
 	    System.out.println("El nombre del archivo es" + nombrearchivo);
-	    sleep();  // borrar 
-	    sleep();
 	    MyOutputStream.write(COMANDO_ENVIAR);
 	    MyOutputStream.flush();
         MyOutputStream.write((nombrearchivo+"").getBytes()); 
@@ -151,16 +147,7 @@ public class ManageConnectionThread extends Thread
         bos.flush();
         a.close();
         bis.close();
-        //bos.close();
-        try
-        {
-        Thread.sleep(1000);	
-        }
-        catch(Exception e)
-        {
-        e.printStackTrace();	
-        }        
-		
+        sleep();        		
 		}// fin del if file_path
 		} // fin del if 
 		
