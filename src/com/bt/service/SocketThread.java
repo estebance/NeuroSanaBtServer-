@@ -86,6 +86,9 @@ public class CaptureSignalThread extends Thread
     private String ACK_EDF           = "9";
     private String ACK_RUTA          = "8";
     private String COMANDO_GETRUTA   = "7";
+    
+	private String COMANDO_VERIFICAR = "11";
+	private String COMANDO_VERIFICADO = "12"; 
     // 
     private String addrfile  =  null;
     private String fromPython = null;
@@ -175,7 +178,12 @@ while(true)
     else if(fromPython.equals(ACK_EDF))
     {                    
         write(ACK_EDF);
-    }      
+    }  
+    
+    else if(fromPython.equals(COMANDO_VERIFICADO))
+    {
+    	set_data_python(COMANDO_VERIFICADO);
+    }	
     
 }	
 	
