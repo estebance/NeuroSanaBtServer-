@@ -21,9 +21,10 @@ import com.bt.server.ServerBt;
 public class ManageConnectionThread extends Thread 
 {
 	private StreamConnection My_Connection;		
-   // private  OutputStream MyOutStream;
     private InputStream MyInputStream;
     private OutputStream MyOutputStream;
+	private SocketThread socket_python;  // socket python     
+    
     private static final int COMANDO_SALIR = 1;
 	private static final int COMANDO_ENVIAR = 2;
 	private static final int COMANDO_CANCELAR=3;
@@ -32,16 +33,17 @@ public class ManageConnectionThread extends Thread
 	private static final int COMANDO_CANCELADO=6;
 	private static final int COMANDO_INICIADO=7;		
 	private static final int COMANDO_FINALIZADO=8;	
-	private static final int COMANDO_ERROR = -1;
 	private static final int ACK_EDF = 9;
     private static final int ACK_RUTA= 8;
     private static final int COMANDO_GETRUTA= 7;
     private static final int COMANDO_FALLA= 10;
 	private static final int COMANDO_VERIFICAR = 11;
 	private static final int COMANDO_VERIFICADO = 12; 
+	private static final int COMANDO_ERROR = -1;
 	
 	
-	private SocketThread socket_python;  // socket python 
+	
+
 	
     public ManageConnectionThread( StreamConnection connection )
 	{
@@ -213,13 +215,17 @@ public class ManageConnectionThread extends Thread
 		
 		if(command == COMANDO_VERIFICAR)
 		{
-			int command_python = 0;	
+			MyOutputStream.write(COMANDO_VERIFICAR);
+		    MyOutputStream.flush();	
+		    
+			int command_python = 12;	
+			/*
 			socket_python.setinfo(Integer.toString(COMANDO_VERIFICAR));
 			sleep();	
 			if(socket_python.getstate() != null)
 			{
 			 command_python = Integer.parseInt(socket_python.getstate());	
-			}	
+			}*/	
 			
 			if(command_python == COMANDO_VERIFICADO)
 			{

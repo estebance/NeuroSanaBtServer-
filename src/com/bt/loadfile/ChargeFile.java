@@ -7,8 +7,7 @@ public class ChargeFile
 {
 
 String routedata; 
-// inicializamos por si se presentan problemas
-String filename = "nada";	
+String filename = null;	
 File f; 
 	
 public ChargeFile(String routedata)
@@ -16,7 +15,6 @@ public ChargeFile(String routedata)
 
 f = new File(routedata);
 filename = f.getName();	
-
 }	
 
 public FileInputStream DataFile_f()
