@@ -12,7 +12,7 @@ import java.io.OutputStream;
 
 import javax.microedition.io.StreamConnection;
 
-import com.bt.loadfile.ChargeFile;
+import com.bt.files.ChargeFile;
 import com.bt.server.ServerBt;
 
 
@@ -161,13 +161,38 @@ public class ManageConnectionThread extends Thread
 	    socket_python.setinfo(Integer.toString(COMANDO_INICIAR));
 	    while(true)
 	    {
-	    if(socket_python.getstate() != null)
+
+		if(socket_python.getstate() != null)
+		{
+		command_python = Integer.parseInt(socket_python.getstate());	
+		}		    		    
+	    int a = 0 ; 
+	    try
 	    {
-	    command_python = Integer.parseInt(socket_python.getstate());	
-	    }	
+	    if(MyInputStream.available() != 0)
+	    {	
+	    a = MyInputStream.read();	
+	    }
+
+	    }
+	    catch(Exception e)
+	    {
+	    e.printStackTrace();	
+	    }
+	    
+	    if(a == COMANDO_CANCELAR)
+		{
+			System.out.println("entro en cancelar");
+	    	socket_python.setinfo(Integer.toString(COMANDO_CANCELAR));
+			MyOutputStream.write(COMANDO_CANCELADO);		
+			MyOutputStream.flush(); 
+			break;
+		} 		    	
+	    	
 	    		    	
-	    if(command_python == COMANDO_ERROR)	
+	    if(command_python == COMANDO_ERROR)		    	
 	    {
+	    	command_python = 0;
 	        MyOutputStream.write(COMANDO_FALLA);		
 		    MyOutputStream.flush(); 
 		    break;
@@ -176,42 +201,17 @@ public class ManageConnectionThread extends Thread
 	    
 	    if(command_python == COMANDO_TERMINADO)
 	    {
+	    	System.out.println("vamos a salir");
 	        MyOutputStream.write(COMANDO_FINALIZADO);		
 		    MyOutputStream.flush(); 
 		    break;
-	    }
+	    }	    
+	    
+	    
 	    
 	    }
-	    
 	    }
-		
-		if(command == COMANDO_CANCELAR)
-		{
-		int command_python = 0;	
-		socket_python.setinfo(Integer.toString(COMANDO_CANCELAR));
-		sleep();	
-		if(socket_python.getstate() != null)
-		{
-		 command_python = Integer.parseInt(socket_python.getstate());	
-		}	
-		
-		if(command_python == COMANDO_CANCELADO)
-		{
-			MyOutputStream.write(COMANDO_CANCELADO);
-		    MyOutputStream.flush();	
-		}
-		if(command_python == COMANDO_ERROR)
-		{
-			MyOutputStream.write(COMANDO_ERROR);
-		    MyOutputStream.flush();	
-			
-		}	
-		/* ordenes para cancelar la toma de archivos se supone  este deberia buscar 
-		* el archivo hasta el momento generado y borrarlo	
-		*/
-
-	    }
-		
+				
 		
 		if(command == COMANDO_VERIFICAR)
 		{
@@ -263,6 +263,7 @@ public class ManageConnectionThread extends Thread
 		MyOutputStream.close();
 		MyInputStream.close();
 		My_Connection.close();
+		socket_python.close_connection();
 		
 	} 
 	

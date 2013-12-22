@@ -1,4 +1,4 @@
-package com.bt.loadfile;
+package com.bt.files;
 
 import java.io.File;
 import java.io.FileInputStream;

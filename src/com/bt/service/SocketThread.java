@@ -46,6 +46,9 @@ public SocketThread()
 	 mythread.start();	
 }
 
+
+
+
 public void setinfo (String data)
 { 
 	   CaptureSignalThread send;
@@ -59,6 +62,29 @@ public void setinfo (String data)
       }
 }
 
+
+public void close_connection()
+{ 
+	   CaptureSignalThread send;
+	   try
+	   {
+	   server.close();
+	   cliente.close();
+	   }
+	   catch(Exception e)
+	   {
+		e.printStackTrace();   
+	   }
+	   /* sincronizando para poder ser empleado */
+      synchronized (this) 
+      {
+
+       send = mythread;
+       mythread.close_stream();
+       mythread.interrupt();
+       
+      }
+}
 
 public String getstate()
 {	
@@ -128,12 +154,15 @@ public void run()
 while(true)
 {
     System.out.println("Escucho a Python");  
+   
     try 
     {
 	fromPython = in.readLine();
+	System.out.println("desde python"+ fromPython);
 	} 
     catch (Exception e) 
     {
+    System.out.println("dano");	
    	e.printStackTrace();
 	}
     
@@ -154,14 +183,23 @@ while(true)
 
     else if(fromPython.equals(COMANDO_CANCELADO))
     {                    
-    	 System.out.println("COMANDO CANCELAR");
+    	 System.out.println("COMANDO CANCELADO");
     	 set_data_python(COMANDO_CANCELADO);
     }
 
     else if(fromPython.equals(ACK_RUTA))
-    {                    
+    {    
+    	System.out.println("estamos en ack ruta");
         set_data_python(ACK_RUTA);
         // escribo que necesito la ruta del archivo
+        try
+        {
+        	Thread.sleep(100);
+        }
+        catch(Exception e)
+        {
+        	
+        }
         write(COMANDO_GETRUTA);
         try 
         {
@@ -196,6 +234,19 @@ while(true)
   out.println(data);	
  }
 
+ public void close_stream()
+ {
+	try
+	{ 
+   in.close();
+   out.close();
+	}
+	catch(Exception e)
+	{
+	e.printStackTrace();	
+	}
+	}
+ 
  public void set_data_python(String command)
  {
  data_from_python = command	;
