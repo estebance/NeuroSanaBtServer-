@@ -6,9 +6,9 @@ import java.io.FileInputStream;
 public class ChargeFile 
 {
 
-String routedata; 
-String filename = null;	
-File f; 
+public String routedata; 
+public String filename = null;	
+public File f; 
 	
 public ChargeFile(String routedata)
 {
