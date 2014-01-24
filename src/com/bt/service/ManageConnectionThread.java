@@ -9,6 +9,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.math.BigInteger;
 
 import javax.microedition.io.StreamConnection;
 
@@ -25,24 +27,26 @@ public class ManageConnectionThread extends Thread
     private OutputStream MyOutputStream;
 	private SocketThread socket_python;  // socket python     
     
-    private static final int COMANDO_SALIR = 1;
-	private static final int COMANDO_ENVIAR = 2;
-	private static final int COMANDO_CANCELAR=3;
-	private static final int COMANDO_INICIAR=4; ;
-	private static final int COMANDO_TERMINADO=5;
-	private static final int COMANDO_CANCELADO=6;
-	private static final int COMANDO_INICIADO=7;		
-	private static final int COMANDO_FINALIZADO=8;	
-	private static final int ACK_EDF = 9;
-    private static final int ACK_RUTA= 8;
-    private static final int COMANDO_GETRUTA= 7;
-    private static final int COMANDO_FALLA= 10;
-	private static final int COMANDO_VERIFICAR = 11;
-	private static final int COMANDO_VERIFICADO = 12; 
-	private static final int COMANDO_ERROR = -1;
+	
+	/* Comandos de interfaz con raspberry y servidor */
+    private static final int COMANDO_SALIR =      1;
+	private static final int COMANDO_ENVIAR =     2;
+	private static final int COMANDO_CANCELAR=    3;
+	private static final int COMANDO_INICIAR=     4;  
+	private static final int COMANDO_TERMINADO=   5;  // responde
+	private static final int COMANDO_CANCELADO=   6;  // respuesta
+	private static final int ACK_EDF =            9;  
+	private static final int ACK_RUTA=            8;
+	private static final int COMANDO_GETRUTA=     7;  
+	private static final int COMANDO_VERIFICAR=  11;
+	private int COMANDO_ERROR =                  13;   // respuesta 
 	
 	
+	/* comandos de manejo del servidor */
+
+	private static final int COMANDO_INICIADO=    7; //respuesta 		
 	
+    
 
 	
     public ManageConnectionThread( StreamConnection connection )
@@ -57,10 +61,11 @@ public class ManageConnectionThread extends Thread
 	
 	try 
 	{
+		int comando = 0;
 		System.out.println("esperando una solicitud por parte del cliente");	
 	    MyInputStream = My_Connection.openInputStream();
 		MyOutputStream = My_Connection.openOutputStream();			
-		int comando = 0;
+		
 		
 		while(true)
 		{			
@@ -99,28 +104,32 @@ public class ManageConnectionThread extends Thread
 		
 		if(command == COMANDO_ENVIAR)
 		{	
-		/*aqui llamo a la ruta del archivo evaluo la funcion en python getroutedata() y esta me devuelve un string con la ruta del archivo*/	
+		/*aqui llama a la ruta del archivo evalua la funcion en python getroutedata() y esta  devuelve un string con la ruta del archivo*/	
 	    int command_python = 0;
 	    String file_path = null;
-		socket_python.setinfo(Integer.toString(COMANDO_ENVIAR));
+		socket_python.setinfo(Integer.toString(COMANDO_ENVIAR)); // envio la orden a python 
 		sleep();
-		if(socket_python.getstate() != null)
+		
+		if(socket_python.getstate() != null)  // capturo lo que regresa python 
 		{
 		command_python = Integer.parseInt(socket_python.getstate());	
 		}	
-		if(command_python == ACK_RUTA)
+		
+		if(command_python == ACK_RUTA)  
 		{
 		sleep();		
 		file_path = socket_python.get_file_path();	
 		if(file_path != null)
 		{	
 		ChargeFile sendata = new ChargeFile(file_path);
-	    /////// como capturar la ruta del archivo generado por insuasty; 
+	    /////// como capturar la ruta del archivo generado ////// 
 	    String nombrearchivo = sendata.GetNameFile();
-	    System.out.println("El nombre del archivo es" + nombrearchivo);
+	    System.out.println("El nombre del archivo es" + nombrearchivo); // enviamos la ruta del archivo 
+	    
 	    MyOutputStream.write(COMANDO_ENVIAR);
 	    MyOutputStream.flush();
-        MyOutputStream.write((nombrearchivo+"").getBytes()); 
+       
+	    MyOutputStream.write((nombrearchivo+"").getBytes()); 
 	    MyOutputStream.flush();
         /*other*/
      
@@ -129,12 +138,14 @@ public class ManageConnectionThread extends Thread
         BufferedInputStream bis = new BufferedInputStream(a);
         int n=-1;
         byte[] buffer = new byte[64];
+        
         while((n = bis.read(buffer)) !=-1)
         { 
         bos.write(buffer,0,n);
-        bos.flush();
+   //     bos.flush();
         }
         System.out.println("salimos");
+        bos.flush(); // este reemplaza al del anterior comentario 
         bos.write(1);
         bos.flush();
         a.close();
@@ -153,12 +164,12 @@ public class ManageConnectionThread extends Thread
 
 		if(command == COMANDO_INICIAR)
 		{		
-		/* ordenes para iniciar la captura de archivos cuando finalmente termine 
-		   respondera con un comando terminado*/		   	
 		int command_python = 0;
-		MyOutputStream.write(COMANDO_INICIADO);		
+		/* ordenes para iniciar la captura de archivos cuando finalmente termine  respondera con un comando terminado*/		   	
+		
+		MyOutputStream.write(COMANDO_INICIADO);	 // le envio a android comando iniciado 	
 	    MyOutputStream.flush();
-	    socket_python.setinfo(Integer.toString(COMANDO_INICIAR));
+	    socket_python.setinfo(Integer.toString(COMANDO_INICIAR)); // le envio a python comando iniciar 
 	    while(true)
 	    {
 
@@ -180,7 +191,7 @@ public class ManageConnectionThread extends Thread
 	    e.printStackTrace();	
 	    }
 	    
-	    if(a == COMANDO_CANCELAR)
+	    if(a == COMANDO_CANCELAR)   // recibo de android comando cancelar 
 		{
 			System.out.println("entro en cancelar");
 	    	socket_python.setinfo(Integer.toString(COMANDO_CANCELAR));
@@ -193,7 +204,7 @@ public class ManageConnectionThread extends Thread
 	    if(command_python == COMANDO_ERROR)		    	
 	    {
 	    	command_python = 0;
-	        MyOutputStream.write(COMANDO_FALLA);		
+	        MyOutputStream.write(COMANDO_ERROR);		
 		    MyOutputStream.flush(); 
 		    break;
 	    	
@@ -202,7 +213,7 @@ public class ManageConnectionThread extends Thread
 	    if(command_python == COMANDO_TERMINADO)
 	    {
 	    	System.out.println("vamos a salir");
-	        MyOutputStream.write(COMANDO_FINALIZADO);		
+	        MyOutputStream.write(COMANDO_TERMINADO); // antes era finalizado 		
 		    MyOutputStream.flush(); 
 		    break;
 	    }	    
@@ -211,34 +222,49 @@ public class ManageConnectionThread extends Thread
 	    
 	    }
 	    }
-				
-		
+					
 		if(command == COMANDO_VERIFICAR)
 		{
-			MyOutputStream.write(COMANDO_VERIFICAR);
+			PrintWriter temp_out = new PrintWriter(MyOutputStream,true);
+			int command_python = 0;	
+			MyOutputStream.write(COMANDO_VERIFICAR);  
 		    MyOutputStream.flush();	
-		    
-			int command_python = 12;	
-			/*
 			socket_python.setinfo(Integer.toString(COMANDO_VERIFICAR));
-			sleep();	
+			while(true){
+			sleep();
+			sleep();
 			if(socket_python.getstate() != null)
-			{
+			{	
 			 command_python = Integer.parseInt(socket_python.getstate());	
-			}*/	
-			
-			if(command_python == COMANDO_VERIFICADO)
-			{
-				MyOutputStream.write(COMANDO_VERIFICADO);
-			    MyOutputStream.flush();	
-			}
+			 System.out.println("regresa el numero_:"+command_python);
+ 			} 	
+
 			if(command_python == COMANDO_ERROR)
 			{
-				MyOutputStream.write(COMANDO_ERROR);
-			    MyOutputStream.flush();	
-				
-			}					
-		}	
+					
+				temp_out.println(COMANDO_ERROR);
+				temp_out.flush();
+				//MyOutputStream.write(COMANDO_FALLA);
+			    //MyOutputStream.flush();	
+			    break;
+			      
+			}
+			else
+			{
+				if( command_python != 0)
+				{	
+				System.out.println("regresa el numero_:"+command_python);
+				temp_out.println(command_python);
+				temp_out.flush();
+				//MyOutputStream.write(255);
+			    //MyOutputStream.flush();		
+			    break;
+				}
+			}
+			
+			}
+			
+		   }// metodo 	
 		
 		
 	   }

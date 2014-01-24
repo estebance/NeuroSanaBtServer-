@@ -104,18 +104,17 @@ public class CaptureSignalThread extends Thread
     //Temporales
     private String COMANDO_ENVIAR    = "2";
     private String COMANDO_CANCELAR  = "3";
-    private String COMANDO_INICIAR   = "4"; ;
+    private String COMANDO_INICIAR   = "4";
     private String COMANDO_TERMINADO = "5";
     private String COMANDO_CANCELADO = "6";
-    private String COMANDO_ERROR     = "-1"; 
+    private String COMANDO_ERROR     = "13"; 
     //
     private String ACK_EDF           = "9";
     private String ACK_RUTA          = "8";
     private String COMANDO_GETRUTA   = "7";
     
 	private String COMANDO_VERIFICAR = "11";
-	private String COMANDO_VERIFICADO = "12"; 
-    // 
+	// 
     private String addrfile  =  null;
     private String fromPython = null;
     private String toPython = null;
@@ -134,7 +133,6 @@ public CaptureSignalThread()
 	{
 
     System.out.println("CONECTADO");
-
 	temp_in = new BufferedReader(new InputStreamReader(cliente.getInputStream()));
 	temp_out = new PrintWriter(cliente.getOutputStream(),true);
     }
@@ -153,8 +151,7 @@ public void run()
 	
 while(true)
 {
-    System.out.println("Escucho a Python");  
-   
+    System.out.println("Escucho a Python");     
     try 
     {
 	fromPython = in.readLine();
@@ -162,7 +159,7 @@ while(true)
 	} 
     catch (Exception e) 
     {
-    System.out.println("dano");	
+    System.out.println("error");	
    	e.printStackTrace();
 	}
     
@@ -194,7 +191,7 @@ while(true)
         // escribo que necesito la ruta del archivo
         try
         {
-        	Thread.sleep(100);
+        Thread.sleep(100);
         }
         catch(Exception e)
         {
@@ -218,10 +215,10 @@ while(true)
         write(ACK_EDF);
     }  
     
-    else if(fromPython.equals(COMANDO_VERIFICADO))
+    else 
     {
-    	set_data_python(COMANDO_VERIFICADO);
-    }	
+    	set_data_python(fromPython);
+    }
     
 }	
 	
