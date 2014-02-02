@@ -11,6 +11,7 @@ import java.net.Socket;
 public class SocketThread  
 {
 	public CaptureSignalThread mythread; 
+	ManageConnectionThread threadprincipal; 
 	public String data_from_python = null ;
 	public String file_path = null ;
     private int PORT = 8083;
@@ -159,7 +160,9 @@ while(true)
 	} 
     catch (Exception e) 
     {
-    System.out.println("error");	
+    System.out.println("error");
+    threadprincipal.closeall();
+    threadprincipal.resume_connection();
    	e.printStackTrace();
 	}
     

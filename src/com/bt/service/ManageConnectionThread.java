@@ -91,6 +91,8 @@ public class ManageConnectionThread extends Thread
 	{
     System.out.println("se esta presentando un error al momento de ejecutar ordenes");
 	e.printStackTrace();	
+	closeall();
+	resume_connection();
 	}		
 	closeall();			
 	}
@@ -142,10 +144,10 @@ public class ManageConnectionThread extends Thread
         while((n = bis.read(buffer)) !=-1)
         { 
         bos.write(buffer,0,n);
-   //     bos.flush();
+        bos.flush();
         }
         System.out.println("salimos");
-        bos.flush(); // este reemplaza al del anterior comentario 
+        //bos.flush(); // este reemplaza al del anterior comentario 
         bos.write(1);
         bos.flush();
         a.close();
@@ -188,6 +190,8 @@ public class ManageConnectionThread extends Thread
 	    }
 	    catch(Exception e)
 	    {
+	    closeall();
+	    resume_connection();	
 	    e.printStackTrace();	
 	    }
 	    
@@ -273,6 +277,8 @@ public class ManageConnectionThread extends Thread
 	   {
 		
 	    System.out.println("error en process command" +e);
+		closeall();
+		resume_connection();
 	    e.printStackTrace();
 	   }
 		
@@ -281,7 +287,7 @@ public class ManageConnectionThread extends Thread
 	}
 	
 	
-	private void closeall()
+	public void closeall()
 	{
 		
 	try
@@ -304,7 +310,7 @@ public class ManageConnectionThread extends Thread
 	}
 	
 	
-	private void resume_connection()
+	public void resume_connection()
 	{
     ServerBt service = new ServerBt();
 	}
